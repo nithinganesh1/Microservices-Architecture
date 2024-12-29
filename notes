@@ -1,0 +1,23 @@
+docker build -f docker/docker-product -t productimg .
+docker build -f docker/docker-order -t orderimg .
+docker build -f docker/docker-auth -t authimg .
+
+docker tag productimg:latest nithingganesh/productimg:latest
+docker tag orderimg:latest nithingganesh/orderimg:latest
+docker tag authimg:latest nithingganesh/authimg:latest
+
+docker push nithingganesh/productimg:latest
+docker push nithingganesh/orderimg:latest
+docker push nithingganesh/authimg:latest
+
+kubectl apply -f k8s/auth_deployment.yaml --namespace p3
+kubectl apply -f k8s/auth_service.yaml --namespace p3
+kubectl rollout restart deployment authservice --namespace p3
+
+kubectl apply -f k8s/order_deployment.yaml --namespace p3
+kubectl apply -f k8s/order_service.yaml --namespace p3
+kubectl rollout restart deployment orderservice --namespace p3
+
+kubectl apply -f k8s/product_deployment.yaml --namespace p3
+kubectl apply -f k8s/product_service.yaml --namespace p3
+kubectl rollout restart deployment productservice --namespace p3
