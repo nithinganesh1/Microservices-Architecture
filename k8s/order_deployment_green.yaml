@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderservice-green
+  namespace: p3
+  labels:
+    app: order-service
+    version: green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+      version: green
+  template:
+    metadata:
+      labels:
+        app: order-service
+        version: green
+    spec:
+      containers:
+      - name: order-container
+        image: nithingganesh/orderimg:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80

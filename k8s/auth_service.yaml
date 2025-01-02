@@ -6,6 +6,7 @@ metadata:
 spec:
   selector:
     app: auth-service
+    version: green  # Initially pointing to blue
   ports:
   - port: 80
     protocol: TCP

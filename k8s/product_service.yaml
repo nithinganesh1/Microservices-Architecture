@@ -6,9 +6,11 @@ metadata:
 spec:
   selector:
     app: product-service
+    version: green #blue
   ports:
   - port: 80
     protocol: TCP
     targetPort: 80
     nodePort: 30004
   type: NodePort
+

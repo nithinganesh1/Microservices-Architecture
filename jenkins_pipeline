@@ -1,0 +1,79 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone') {
+            steps {
+                git url: 'https://github.com/nithinganesh1/Microservices-Architecture.git', branch: 'main'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                script {
+                    sh "docker build -f docker/docker-auth -t authimg ."
+                    sh "docker build -f docker/docker-order -t orderimg ."
+                    sh "docker build -f docker/docker-product -t productimg ."
+                }
+            }
+        }
+
+        stage('Tag and Push Docker Images') {
+            steps {
+                script {
+                    sh "docker tag productimg:latest nithingganesh/productimg:latest"
+                    sh "docker tag orderimg:latest nithingganesh/orderimg:latest"
+                    sh "docker tag authimg:latest nithingganesh/authimg:latest"
+                    
+                    sh "docker push nithingganesh/productimg:latest"
+                    sh "docker push nithingganesh/orderimg:latest"
+                    sh "docker push nithingganesh/authimg:latest"
+                }
+            }
+        }
+
+        stage('Deploy Blue-Green for authservice') {
+            steps {
+                script {
+                    // Deploy both Blue and Green
+                    sh "kubectl apply -f k8s/auth_deployment_blue.yaml --namespace p3"
+                    sh "kubectl apply -f k8s/auth_deployment_green.yaml --namespace p3"
+                    sh "kubectl apply -f k8s/auth_service.yaml --namespace p3"
+                }
+            }
+        }
+
+        stage('Deploy Blue-Green for orderservice') {
+            steps {
+                script {
+                    // Deploy both Blue and Green
+                    sh "kubectl apply -f k8s/order_deployment_blue.yaml --namespace p3"
+                    sh "kubectl apply -f k8s/order_deployment_green.yaml --namespace p3"
+                    sh "kubectl apply -f k8s/order_service.yaml --namespace p3"
+                }
+            }
+        }
+
+        stage('Deploy Blue-Green for productservice') {
+            steps {
+                script {
+                    // Deploy both Blue and Green
+                    sh "kubectl apply -f k8s/product_deployment_blue.yaml --namespace p3"
+                    sh "kubectl apply -f k8s/product_deployment_green.yaml --namespace p3"
+                    sh "kubectl apply -f k8s/product_service.yaml --namespace p3"
+                }
+            }
+        }
+
+        stage('Restart Deployments (Optional)') {
+            steps {
+                script {
+                    // Optionally restart deployments after successful traffic switch
+                    sh "kubectl rollout restart deployment authservice --namespace p3"
+                    sh "kubectl rollout restart deployment orderservice --namespace p3"
+                    sh "kubectl rollout restart deployment productservice --namespace p3"
+                }
+            }
+        }
+    }
+}

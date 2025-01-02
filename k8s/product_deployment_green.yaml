@@ -1,23 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: authservice
+  name: productservice-green
   namespace: p3
   labels:
-    app: auth-service
+    app: product-service
+    version: green
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: auth-service
+      app: product-service
+      version: green
   template:
     metadata:
       labels:
-        app: auth-service
+        app: product-service
+        version: green
     spec:
       containers:
-      - name: auth-container
-        image: nithingganesh/authimg:latest
+      - name: product-container
+        image: nithingganesh/productimg:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
